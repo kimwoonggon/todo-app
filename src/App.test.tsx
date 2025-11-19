@@ -1,5 +1,6 @@
 import { afterAll, describe, expect, test } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import App from './App';
 
@@ -8,33 +9,16 @@ import App from './App';
 afterAll(cleanup);
 
 describe('App', () => {
-  test('should render input field and add button', () => {
+  test('should add a task when Enter key is pressed', async () => {
+    const user = userEvent.setup();
     render(<App />);
 
-    // screen.getByRole('textbox', { name: 'Add Task:' });
-    // screen.getByRole('button', { name: 'Add' });
     const input = screen.getByRole('textbox', { name: 'Add Task:' });
-    const button = screen.getByRole('button', { name: 'Add' });
 
-    // expect(input).toBeDefined();
-    // expect(button).toBeDefined();
+    await user.type(input, 'New Task(enter){enter}');
 
-    expect(input).toBeInTheDocument();
-    expect(button).toBeInTheDocument();
-  });
-
-  test('should add a new task when the add button is clicked', () => {
-    render(<App />);
-    const input = screen.getByRole('textbox', { name: 'Add Task:' });
-    const button = screen.getByRole('button', { name: 'Add' });
-
-    fireEvent.change(input, {
-      target: {
-        value: 'New Task',
-      },
+    await waitFor(() => {
+      expect(screen.queryAllByRole('listitem')).toHaveLength(2);
     });
-    fireEvent.click(button);
-
-    expect(screen.getByText('New Task')).toBeInTheDocument();
   });
 });
